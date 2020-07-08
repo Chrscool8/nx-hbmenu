@@ -225,13 +225,13 @@ static void drawIcon(int x, int y, int width, int height, const uint8_t *image, 
     }
 }
 
-static void drawEntry(menuEntry_s* me, int off_x, int is_active) {
+static void drawEntry(menuEntry_s* me, int off_x, int off_y, int is_active) {
     ThemeLayoutObject *layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuList];
     int x, y;
-    int start_y = layoutobj->posStart[1];//*(n % 2);
-    int end_y = start_y + layoutobj->size[1];
     int start_x = off_x;//(n / 2);
     int end_x = start_x + layoutobj->size[0];
+    int start_y = layoutobj->posStart[1] + off_y;//*(n % 2);
+    int end_y = start_y + layoutobj->size[1];
     int j;
 
     const uint8_t *smallimg = NULL;
@@ -346,51 +346,55 @@ static void drawEntry(menuEntry_s* me, int off_x, int is_active) {
         drawImage(start_x + layoutobj->posStart[0], start_y + layoutobj->posStart[1], layoutobj->size[0], layoutobj->size[1], smallimg, IMAGE_MODE_RGB24);
     }
 
-    layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryIcon];
-    if (is_active && largeimg && layoutobj->visible) {
-        drawImage(layoutobj->posStart[0], layoutobj->posStart[1], layoutobj->size[0], layoutobj->size[1], largeimg, IMAGE_MODE_RGB24);
+    menu_s* menu = menuGetCurrent();
+    if (menu->view_style == STYLE_LIST)
+    {
+        layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryIcon];
+        if (is_active && largeimg && layoutobj->visible) {
+            drawImage(layoutobj->posStart[0], layoutobj->posStart[1], layoutobj->size[0], layoutobj->size[1], largeimg, IMAGE_MODE_RGB24);
 
-        shadow_start_y = layoutobj->posStart[1]+layoutobj->size[1];
-        border_start_x = layoutobj->posStart[0];
-        border_end_x = layoutobj->posStart[0]+layoutobj->size[0];
+            shadow_start_y = layoutobj->posStart[1] + layoutobj->size[1];
+            border_start_x = layoutobj->posStart[0];
+            border_end_x = layoutobj->posStart[0] + layoutobj->size[0];
 
-        for (shadow_y=shadow_start_y; shadow_y <shadow_start_y+shadow_size; shadow_y++) {
-            for (x=border_start_x; x<border_end_x; x++) {
-                shadow_color = MakeColor(0, 0, 0, shadow_alpha_base * (1.0 - (float)(shadow_y - shadow_start_y) / ((float)shadow_size)));
-                shadow_inset =(shadow_y-shadow_start_y);
+            for (shadow_y = shadow_start_y; shadow_y < shadow_start_y + shadow_size; shadow_y++) {
+                for (x = border_start_x; x < border_end_x; x++) {
+                    shadow_color = MakeColor(0, 0, 0, shadow_alpha_base * (1.0 - (float)(shadow_y - shadow_start_y) / ((float)shadow_size)));
+                    shadow_inset = (shadow_y - shadow_start_y);
 
-                if (x >= border_start_x + shadow_inset && x <= border_end_x - shadow_inset) {
-                    DrawPixel(x, shadow_y, shadow_color);
+                    if (x >= border_start_x + shadow_inset && x <= border_end_x - shadow_inset) {
+                        DrawPixel(x, shadow_y, shadow_color);
+                    }
                 }
             }
         }
-    }
 
-    if (me->type != ENTRY_TYPE_THEME)
-        strptr = me->starred ? themeCurrent.labelStarOnText : "";
-    else
-        strptr = "";
+        if (me->type != ENTRY_TYPE_THEME)
+            strptr = me->starred ? themeCurrent.labelStarOnText : "";
+        else
+            strptr = "";
 
-    memset(tmpstr, 0, sizeof(tmpstr));
-    snprintf(tmpstr, sizeof(tmpstr)-1, "%s%s", strptr, me->name);
+        memset(tmpstr, 0, sizeof(tmpstr));
+        snprintf(tmpstr, sizeof(tmpstr) - 1, "%s%s", strptr, me->name);
 
-    layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuListName];
-    DrawTextTruncate(layoutobj->font, start_x + layoutobj->posStart[0], start_y + layoutobj->posStart[1], themeCurrent.borderTextColor, tmpstr, layoutobj->size[0], "...");
+        layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuListName];
+        DrawTextTruncate(layoutobj->font, start_x + layoutobj->posStart[0], start_y + layoutobj->posStart[1], themeCurrent.borderTextColor, tmpstr, layoutobj->size[0], "...");
 
-    if (is_active) {
-        layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryName];
-        if (layoutobj->visible) DrawTextTruncate(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr, layoutobj->size[0], "...");
+        if (is_active) {
+            layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryName];
+            if (layoutobj->visible) DrawTextTruncate(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr, layoutobj->size[0], "...");
 
-        if (me->type != ENTRY_TYPE_FOLDER) {
-            memset(tmpstr, 0, sizeof(tmpstr));
-            snprintf(tmpstr, sizeof(tmpstr)-1, "%s: %s", textGetString(StrId_AppInfo_Author), me->author);
-            layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryAuthor];
-            if (layoutobj->visible) DrawText(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr);
+            if (me->type != ENTRY_TYPE_FOLDER) {
+                memset(tmpstr, 0, sizeof(tmpstr));
+                snprintf(tmpstr, sizeof(tmpstr) - 1, "%s: %s", textGetString(StrId_AppInfo_Author), me->author);
+                layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryAuthor];
+                if (layoutobj->visible) DrawText(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr);
 
-            memset(tmpstr, 0, sizeof(tmpstr));
-            snprintf(tmpstr, sizeof(tmpstr)-1, "%s: %s", textGetString(StrId_AppInfo_Version), me->version);
-            layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryVersion];
-            if (layoutobj->visible) DrawText(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr);
+                memset(tmpstr, 0, sizeof(tmpstr));
+                snprintf(tmpstr, sizeof(tmpstr) - 1, "%s: %s", textGetString(StrId_AppInfo_Version), me->version);
+                layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryVersion];
+                if (layoutobj->visible) DrawText(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr);
+            }
         }
     }
 }
@@ -833,24 +837,48 @@ void menuLoop(void) {
 
         menuEntry_s *active_entry = NULL;
 
-        // Draw menu entries
-        for (me = menu->firstEntry, i = 0; me; me = me->next, i ++) {
-            int entry_start_x = layoutobj->posStart[0] + i * layoutobj->posEnd[0];
-            int entry_draw_x = entry_start_x + menu->xPos;
+        if (menu->view_style == STYLE_GRID)
+        {
+            // grid
+            for (me = menu->firstEntry, i = 0; me; me = me->next, i++) {
+                int entry_start_x = layoutobj->posStart[0] + (i % 7) * layoutobj->posEnd[0];
+                int entry_draw_x = entry_start_x;
+                int entry_draw_y = ((i / 7) - (menu->curEntry / 7)) * 200 - 350;
 
-            int screen_width = 1280;
-            if (entry_start_x >= (screen_width - menu->xPos))
-                break;
+                int screen_height = 720;
+                if (entry_draw_y >= (screen_height))
+                    break;
 
-            int is_active = i==menu->curEntry;
+                int is_active = i == menu->curEntry;
 
-            if (is_active)
-                active_entry = me;
+                if (is_active)
+                    active_entry = me;
 
-            if (!is_active && entry_draw_x < -(layoutobj->posStart[0] + layoutobj->posEnd[0]))
-                continue;
+                drawEntry(me, entry_draw_x, entry_draw_y, is_active);
+            }
+        }
+        else
+        {
+            // Draw menu entries - list
+            for (me = menu->firstEntry, i = 0; me; me = me->next, i++) {
+                int entry_start_x = layoutobj->posStart[0] + i * layoutobj->posEnd[0];
+                int entry_draw_x = entry_start_x + menu->xPos;
+                int entry_draw_y = 0;
 
-            drawEntry(me, entry_draw_x, is_active);
+                int screen_width = 1280;
+                if (entry_start_x >= (screen_width - menu->xPos))
+                    break;
+
+                int is_active = i == menu->curEntry;
+
+                if (is_active)
+                    active_entry = me;
+
+                if (!is_active && entry_draw_x < -(layoutobj->posStart[0] + layoutobj->posEnd[0]))
+                    continue;
+
+                drawEntry(me, entry_draw_x, entry_draw_y, is_active);
+            }
         }
 
         layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuTypeMsg];

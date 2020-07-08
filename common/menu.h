@@ -24,6 +24,12 @@ typedef enum
     ENTRY_TYPE_FILE_OTHER,
 } MenuEntryType;
 
+typedef enum
+{
+    STYLE_LIST,
+    STYLE_GRID
+} MenuStyle;
+
 typedef struct menuEntry_s_tag menuEntry_s;
 typedef struct menu_s_tag menu_s;
 
@@ -34,6 +40,7 @@ struct menu_s_tag
     int curEntry;
     int xPos;
     int slideSpeed;
+    bool view_style;
 
     char dirname[PATH_MAX+1];
 };
@@ -66,7 +73,7 @@ struct menuEntry_s_tag
     size_t icon_size;
     uint8_t *icon_gfx;
     uint8_t *icon_gfx_small;
-    
+
     bool starred;
 
     NacpStruct *nacp;

@@ -211,12 +211,17 @@ bool menuUpdate(void) {
     u64 down = menuGetKeysDown();
     ThemeLayoutObject *layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuListTiles];
     int entries_count = layoutobj->posEnd[0];
-    
+
     handleTouch(menu);
 
     if (down & KEY_Y)
     {
-        launchMenuNetloaderTask();
+        if (menu->view_style == STYLE_GRID)
+            menu->view_style = STYLE_LIST;
+        else
+            menu->view_style = STYLE_GRID;
+
+        //launchMenuNetloaderTask();
     }
     else if (down & KEY_X)
     {
@@ -243,8 +248,8 @@ bool menuUpdate(void) {
 
         if (down & KEY_LEFT) move--;
         if (down & KEY_RIGHT) move++;
-        if (down & KEY_DOWN) move-=entries_count;
-        if (down & KEY_UP) move+=entries_count;
+        if (down & KEY_DOWN) move+=entries_count;
+        if (down & KEY_UP) move-=entries_count;
 
         int newEntry = menu->curEntry + move;
         if (newEntry < 0) newEntry = 0;
