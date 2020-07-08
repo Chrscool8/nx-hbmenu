@@ -1,3 +1,9 @@
+### New in this branch
+An all new grid style layout experiment.
+Toggle with Y, works just fine with directional pad, not touch supported yet.
+
+![](https://i.imgur.com/R6hv4b9.jpg)
+
 ### Usage
 See [Homebrew_Applications](https://switchbrew.org/wiki/Homebrew_Applications) for SD layout and applications, etc. See [Switchbrew](https://switchbrew.org/wiki/Homebrew_Menu) for hbmenu docs.
 

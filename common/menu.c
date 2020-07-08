@@ -368,18 +368,20 @@ static void drawEntry(menuEntry_s* me, int off_x, int off_y, int is_active) {
                 }
             }
         }
+    }
 
-        if (me->type != ENTRY_TYPE_THEME)
-            strptr = me->starred ? themeCurrent.labelStarOnText : "";
-        else
-            strptr = "";
+    if (me->type != ENTRY_TYPE_THEME)
+        strptr = me->starred ? themeCurrent.labelStarOnText : "";
+    else
+        strptr = "";
 
-        memset(tmpstr, 0, sizeof(tmpstr));
-        snprintf(tmpstr, sizeof(tmpstr) - 1, "%s%s", strptr, me->name);
+    memset(tmpstr, 0, sizeof(tmpstr));
+    snprintf(tmpstr, sizeof(tmpstr) - 1, "%s%s", strptr, me->name);
 
-        layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuListName];
-        DrawTextTruncate(layoutobj->font, start_x + layoutobj->posStart[0], start_y + layoutobj->posStart[1], themeCurrent.borderTextColor, tmpstr, layoutobj->size[0], "...");
+    layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuListName];
+    DrawTextTruncate(layoutobj->font, start_x + layoutobj->posStart[0], start_y + layoutobj->posStart[1], themeCurrent.borderTextColor, tmpstr, layoutobj->size[0], "...");
 
+    if (menu->view_style == STYLE_LIST) {
         if (is_active) {
             layoutobj = &themeCurrent.layoutObjects[ThemeLayoutId_MenuActiveEntryName];
             if (layoutobj->visible) DrawTextTruncate(layoutobj->font, layoutobj->posStart[0], layoutobj->posStart[1], themeCurrent.textColor, tmpstr, layoutobj->size[0], "...");
